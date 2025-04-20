@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>File Zipper</title>
+  <link rel="stylesheet" href="index.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>📦 File Zipper</h1>
+
+    <form id="zipForm" enctype="multipart/form-data">
+      <label for="textInput">Enter Text to Compress/Decompress</label>
+      <textarea id="textInput" rows="6" placeholder="Type or paste text here..."></textarea>
+      <label for="fileInput">Or Upload a File to Compress/Decompress</label>
+      <input type="file" id="fileInput" name="file"/>
+      <div class="button-group">
+        <button type="button" id="compressBtn">Compress</button>
+        <button type="button" id="decompressBtn">Decompress</button>
+      </div>
+    </form>
+
+    <div class="result">
+      <h2>Result:</h2>
+      <pre id="resultOutput">Nothing yet...</pre>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    let compressedtext=""
+    const input = document.getElementById("textInput");
+    const result = document.getElementById("resultOutput");
+    
+    document.getElementById("compressBtn").addEventListener("click", async () => {
+      const fileInput = document.getElementById("fileInput");
+      const file = fileInput.files[0];// if multiple files are uploaded
+    
+      if (file) {
+        // If a file is selected, send it to the server
+        const formData = new FormData();
+        formData.append("file", file);
+    
+        const res = await axios.post("http://localhost:3000/uploads", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
+        });
+        document.getElementById("resultOutput").innerHTML =`${res.data.message}<br>
+        <a href="${res.data.downloadLink}" download>📥 Click here to download</a>`;
+
+      }
+        else{
+          const res = await axios.get("http://localhost:3000/compress",{
+            headers:{
+                input:input.value
+            }
+          }) 
+          compressedtext=res.data;
+          result.textContent = res.data;
+        }
+      
+    document.getElementById("decompressBtn").addEventListener("click",async()=>{
+      const res=await axios.get("http://localhost:3000/decompress",{
+        headers:{
+          input:compressedtext
+        }
+      })
+      result.textContent=res.data
+    })
+  })
+    
+  </script>
+</body>
+</html>
