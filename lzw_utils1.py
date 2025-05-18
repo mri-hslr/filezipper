@@ -1,44 +1,3 @@
-
-"""
-i am creating a project in which i am compressing files using lzw algorithm the code for which is uploaded above 
-CREATE  api requests for the above code which accepts files in format .txt,.pdf, microsoft pdf documents and docs files ,,also check for the contents in the files if any image is present show a message that file contains images cannot be compressed use dynamic approach for encoding and decoding the file inorder to achieve maximum stability , also dynamicallly set bit length to save from extra space usage set regex rules for input files and save the compressed files as <inputFileName>_compressed folllowed by the extension add route path as well and show compression ratio and percentage compressed along with time taken to compress the file 
-"""
-"""
-To fulfill your request, I have created a FastAPI-based LZW compression API with the following features:
-
-✅ Features Implemented:
-Accepts file types: .txt, .pdf (only text-based), .doc, .docx.
-
-Uses regex for allowed file extensions.
-
-Detects presence of images and rejects image-containing PDFs.
-
-Dynamically sets the bit length (9 to 16) based on content size.
-
-Saves output as <filename>_compressed.lzw.
-
-Returns:
-
-Compression time
-
-Compression ratio
-
-Percentage compressed
-
-Route: /compress
-
-📦 File Structure
-css
-Copy
-Edit
-project/
-│
-├── main.py            ← FastAPI app
-├── lzw_utils.py       ← Compression logic & utilities
-"""
-
-
-
 import fitz  # PyMuPDF
 import docx
 import io
@@ -103,3 +62,22 @@ def lzw_compress(inputstring: str):
      
     y = "".join([chr(code) for code in result])
     return y, bit_length
+if __name__ == "__main__":
+    import sys
+    import json
+
+    filename = sys.argv[1]
+
+    with open(filename, 'rb') as f:
+        content = f.read()
+
+    try:
+        text, _ = read_text_from_file(content, filename)
+        compressed, bit_length = lzw_compress(text)
+        print(json.dumps({
+            "compressed": compressed,
+            "bit_length": bit_length
+        }))
+    except Exception as e:
+        print(json.dumps({"error": str(e)}))
+
